@@ -13,6 +13,8 @@ import TMessagesData from "../../typings/MessagesData";
 import firstAlbumArt from "../../assets/sampleData/Nathaniel-Bassey-The-King-Is-Coming-Cover.jpg";
 
 // musicFilePaths
+// Temporarily using smaller file for iPhone compatibility testing
+import testMusic from "../../assets/sampleData/music/night-city.mp3";
 import firstMusic from "../../assets/sampleData/music/Nathaniel-Bassey-Yeshua-Hamashiach-[TrendyBeatz.com].mp3";
 
 // framer transition and variants
@@ -51,7 +53,7 @@ const sampleMessagesDataArray: TMessagesData[] = [
       "Whether it's eating cake, opening presents, or just chilling out, I hope you have the best time ever. Here's to another year of being awesome, slaying the game, and living your best life.",
       "You're a true gem, Andrea, and I feel lucky to know you. Happy birthday and cheers to a fantastic year ahead!",
     ],
-    musicFilePath: firstMusic,
+    musicFilePath: testMusic, // Using smaller file for iPhone testing
   },
   // Commented out wish/1 for now - only showing wish/0
   // {

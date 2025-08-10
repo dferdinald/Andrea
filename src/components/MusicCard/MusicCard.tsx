@@ -23,26 +23,40 @@ const MusicCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Initialize audio element
   useEffect(() => {
     const audio = new Audio();
     audio.src = musicFilePath;
     audio.volume = 0.5;
-    audio.preload = 'metadata';
+
+    // iPhone-specific settings
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      // On iOS, don't preload to avoid loading issues
+      audio.preload = 'none';
+      // Set additional iOS-friendly properties
+      audio.crossOrigin = 'anonymous';
+    } else {
+      audio.preload = 'metadata';
+    }
 
     // Audio event listeners
     audio.addEventListener('loadstart', () => {
       setIsLoading(true);
       setAudioError(null);
+      if (isIOS) setDebugInfo('Loading started...');
     });
 
     audio.addEventListener('canplay', () => {
       setIsLoading(false);
+      if (isIOS) setDebugInfo('Can play');
     });
 
     audio.addEventListener('loadeddata', () => {
       setIsLoading(false);
+      if (isIOS) setDebugInfo('Data loaded');
     });
 
     audio.addEventListener('play', () => {
@@ -109,57 +123,111 @@ const MusicCard = ({
           }
         }
 
+        // iPhone-specific loading strategy
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const loadTimeout = isIOS ? 20000 : 10000; // Longer timeout for iOS
+
         // Ensure audio is loaded
         if (audio.readyState < 2) {
-          console.log('Audio not ready, loading...');
           await new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
               audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('canplaythrough', onCanPlayThrough);
+              audio.removeEventListener('loadeddata', onLoadedData);
               audio.removeEventListener('error', onError);
               reject(new Error('Audio load timeout'));
-            }, 10000); // 10 second timeout
+            }, loadTimeout);
 
             const onCanPlay = () => {
               clearTimeout(timeout);
               audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('canplaythrough', onCanPlayThrough);
+              audio.removeEventListener('loadeddata', onLoadedData);
               audio.removeEventListener('error', onError);
               resolve(void 0);
             };
+
+            const onCanPlayThrough = () => {
+              clearTimeout(timeout);
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('canplaythrough', onCanPlayThrough);
+              audio.removeEventListener('loadeddata', onLoadedData);
+              audio.removeEventListener('error', onError);
+              resolve(void 0);
+            };
+
+            const onLoadedData = () => {
+              if (isIOS) {
+                // On iOS, loadeddata might be enough
+                clearTimeout(timeout);
+                audio.removeEventListener('canplay', onCanPlay);
+                audio.removeEventListener('canplaythrough', onCanPlayThrough);
+                audio.removeEventListener('loadeddata', onLoadedData);
+                audio.removeEventListener('error', onError);
+                resolve(void 0);
+              }
+            };
+
             const onError = () => {
               clearTimeout(timeout);
               audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('canplaythrough', onCanPlayThrough);
+              audio.removeEventListener('loadeddata', onLoadedData);
               audio.removeEventListener('error', onError);
               reject(new Error('Audio failed to load'));
             };
+
             audio.addEventListener('canplay', onCanPlay);
+            audio.addEventListener('canplaythrough', onCanPlayThrough);
+            audio.addEventListener('loadeddata', onLoadedData);
             audio.addEventListener('error', onError);
+
+            // Force load
             audio.load();
           });
         }
 
-        // Multiple attempts to play
-        let playAttempts = 0;
-        const maxAttempts = 3;
-
-        while (playAttempts < maxAttempts) {
+        // iPhone-specific play strategy
+        if (isIOS) {
+          // On iOS, try a more direct approach
           try {
             const playPromise = audio.play();
-
             if (playPromise !== undefined) {
               await playPromise;
-              console.log('Music started playing');
-              break;
             }
-          } catch (playError) {
-            playAttempts++;
-            console.warn(`Play attempt ${playAttempts} failed:`, playError);
-
-            if (playAttempts >= maxAttempts) {
-              throw playError;
+          } catch (iosError) {
+            // If direct play fails on iOS, try reloading and playing again
+            audio.load();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const retryPromise = audio.play();
+            if (retryPromise !== undefined) {
+              await retryPromise;
             }
+          }
+        } else {
+          // Multiple attempts for other browsers
+          let playAttempts = 0;
+          const maxAttempts = 3;
 
-            // Wait a bit before retrying
-            await new Promise(resolve => setTimeout(resolve, 500));
+          while (playAttempts < maxAttempts) {
+            try {
+              const playPromise = audio.play();
+
+              if (playPromise !== undefined) {
+                await playPromise;
+                break;
+              }
+            } catch (playError) {
+              playAttempts++;
+              console.warn(`Play attempt ${playAttempts} failed:`, playError);
+
+              if (playAttempts >= maxAttempts) {
+                throw playError;
+              }
+
+              // Wait a bit before retrying
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
           }
         }
 
@@ -215,7 +283,22 @@ const MusicCard = ({
             {isLoading ? "Loading..." : isPlaying ? "Pause" : "Play"}
           </button>
           {audioError && (
-            <p className="text-red-400 text-xs text-center">{audioError}</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-red-400 text-xs text-center">{audioError}</p>
+              {/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                <a
+                  href={musicFilePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 text-xs text-center underline"
+                >
+                  Open audio file directly
+                </a>
+              )}
+            </div>
+          )}
+          {/iPad|iPhone|iPod/.test(navigator.userAgent) && debugInfo && (
+            <p className="text-blue-400 text-xs text-center">Debug: {debugInfo}</p>
           )}
         </div>
       </motion.div>
