@@ -13,30 +13,76 @@ const MusicCard = ({
   musicName,
   musicFilePath,
 }: TMusicCard) => {
+  // Debug logging
+  console.log('MusicCard props:', {
+    albumArt,
+    primaryColor,
+    musicName,
+    musicFilePath
+  });
+
   const style = {
     "--primary": primaryColor,
   } as React.CSSProperties;
 
   const location = useLocation();
 
-  const [play, { stop, pause }] = useSound(musicFilePath);
-
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const bootMusic = () => {
-    if (isPlaying) {
+  const [play, { stop, sound }] = useSound(musicFilePath, {
+    volume: 0.5,
+    onload: () => {
+      console.log('Audio loaded successfully');
+    },
+    onloaderror: (error) => console.error('Audio load error:', error),
+    onend: () => {
+      console.log('Audio ended');
       setIsPlaying(false);
-      pause();
+    }
+  });
+
+  const bootMusic = () => {
+    console.log('Boot music called, isPlaying:', isPlaying);
+    console.log('Music file path:', musicFilePath);
+    console.log('Sound object:', sound);
+
+    if (isPlaying) {
+      // Pause the audio
+      if (sound && typeof sound.pause === 'function') {
+        sound.pause();
+        console.log('Music paused using sound.pause()');
+      } else {
+        stop();
+        console.log('Music stopped using stop()');
+      }
+      setIsPlaying(false);
     } else {
-      setIsPlaying(true);
-      play();
+      // Play the audio
+      try {
+        if (sound && typeof sound.play === 'function') {
+          sound.play();
+          console.log('Music played using sound.play()');
+        } else {
+          play();
+          console.log('Music played using play()');
+        }
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing music:', error);
+        setIsPlaying(false);
+      }
     }
   };
 
   useEffect(() => {
-    stop();
+    // Stop music when navigating to different pages
+    if (sound && typeof sound.stop === 'function') {
+      sound.stop();
+    } else {
+      stop();
+    }
     setIsPlaying(false);
-  }, [location]);
+  }, [location, stop, sound]);
 
   return (
     <div className="h-full m-2 p-2 md:p-0 wrapper-bg-full">
