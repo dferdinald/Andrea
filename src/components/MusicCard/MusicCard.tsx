@@ -23,7 +23,6 @@ const MusicCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Initialize audio element
   useEffect(() => {
@@ -46,17 +45,14 @@ const MusicCard = ({
     audio.addEventListener('loadstart', () => {
       setIsLoading(true);
       setAudioError(null);
-      if (isIOS) setDebugInfo('Loading started...');
     });
 
     audio.addEventListener('canplay', () => {
       setIsLoading(false);
-      if (isIOS) setDebugInfo('Can play');
     });
 
     audio.addEventListener('loadeddata', () => {
       setIsLoading(false);
-      if (isIOS) setDebugInfo('Data loaded');
     });
 
     audio.addEventListener('play', () => {
@@ -297,9 +293,7 @@ const MusicCard = ({
               )}
             </div>
           )}
-          {/iPad|iPhone|iPod/.test(navigator.userAgent) && debugInfo && (
-            <p className="text-blue-400 text-xs text-center">Debug: {debugInfo}</p>
-          )}
+
         </div>
       </motion.div>
     </div>

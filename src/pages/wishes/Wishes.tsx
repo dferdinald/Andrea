@@ -10,12 +10,10 @@ import MusicCard from "../../components/MusicCard/MusicCard";
 import TMessagesData from "../../typings/MessagesData";
 
 // albumArts
-import firstAlbumArt from "../../assets/sampleData/Nathaniel-Bassey-The-King-Is-Coming-Cover.jpg";
+import firstAlbumArt from "../../assets/sampleData/first-album-art.webp";
 
 // musicFilePaths
-// Temporarily using smaller file for iPhone compatibility testing
-import testMusic from "../../assets/sampleData/music/night-city.mp3";
-import firstMusic from "../../assets/sampleData/music/Nathaniel-Bassey-Yeshua-Hamashiach-[TrendyBeatz.com].mp3";
+import firstMusic from "../../assets/sampleData/music/night-city.mp3";
 
 // framer transition and variants
 const commonTransition = {
@@ -46,14 +44,14 @@ const messages = {
 const sampleMessagesDataArray: TMessagesData[] = [
   {
     albumArt: firstAlbumArt,
-    musicName: "Yeshua Hamashiach - Nathaniel Bassey",
+    musicName: "Night City - R E L's Version",
     messageInParas: [
       "Hey there Andrea, it's your birthday! Wishing you the happiest of birthdays filled with all the things you love and cherish the most.",
       "May this year be filled with lots of laughter, love, and unforgettable memories. I hope you get to spend your special day surrounded by the people you care about, doing all the things that make you happy.",
       "Whether it's eating cake, opening presents, or just chilling out, I hope you have the best time ever. Here's to another year of being awesome, slaying the game, and living your best life.",
       "You're a true gem, Andrea, and I feel lucky to know you. Happy birthday and cheers to a fantastic year ahead!",
     ],
-    musicFilePath: testMusic, // Using smaller file for iPhone testing
+    musicFilePath: firstMusic,
   },
   // Commented out wish/1 for now - only showing wish/0
   // {
