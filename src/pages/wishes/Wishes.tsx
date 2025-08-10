@@ -11,11 +11,9 @@ import TMessagesData from "../../typings/MessagesData";
 
 // albumArts
 import firstAlbumArt from "../../assets/sampleData/Nathaniel-Bassey-The-King-Is-Coming-Cover.jpg";
-import secondAlbumArt from "../../assets/sampleData/second-album-art.webp";
 
 // musicFilePaths
 import firstMusic from "../../assets/sampleData/music/Nathaniel-Bassey-Yeshua-Hamashiach-[TrendyBeatz.com].mp3";
-import secondMusic from "../../assets/sampleData/music/almost-nothing.mp3";
 
 // framer transition and variants
 const commonTransition = {
